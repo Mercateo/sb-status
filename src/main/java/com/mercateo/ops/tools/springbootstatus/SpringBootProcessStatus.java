@@ -13,7 +13,6 @@ import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXConnectorFactory;
 import javax.management.remote.JMXServiceURL;
 
-import com.google.gson.Gson;
 import com.sun.tools.attach.AgentInitializationException;
 import com.sun.tools.attach.AgentLoadException;
 import com.sun.tools.attach.VirtualMachine;
@@ -47,11 +46,11 @@ public class SpringBootProcessStatus {
             debug("Query JMX for '" + jmxUrl + "'");
             ObjectName objName = new ObjectName(jmxUrl);
 
-            String json = mbsc.getAttribute(objName, "Data").toString();
-            debug("Health endpoint returned: '" + json + "'");
+            String healthData = mbsc.getAttribute(objName, "Data").toString();
+            debug("Health endpoint returned: '" + healthData + "'");
 
-            StatusBean status = new Gson().fromJson(json, StatusBean.class);
-            debug("StatusBean parsed from json: '" + status.toString() + "'");
+            StatusBean status = new StatusBean(healthData);
+            debug("StatusBean parsed from healthData: '" + status.toString() + "'");
 
             exit(status.isUp() ? 0 : 1);
 
