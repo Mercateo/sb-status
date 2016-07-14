@@ -32,7 +32,7 @@ public class SpringBootProcessStatus {
 
         debug("Attaching to target VM");
         VirtualMachine vm = VirtualMachine.attach(cmd.pid);
-        String version = getMavenVersion(vm);
+        String version = getOutput(vm);
         System.out.println(version);
 
         String connectorAddr = jmxConnect(vm);
@@ -85,7 +85,6 @@ public class SpringBootProcessStatus {
     }
 
     private static void exit(int returnCode) {
-        debug("Exiting with RT=" + returnCode);
         System.exit(returnCode);
     }
 
@@ -95,21 +94,33 @@ public class SpringBootProcessStatus {
                 "com.sun.management.jmxremote.localConnectorAddress");
     }
 
-    private static String getMavenVersion(VirtualMachine vm)
+    private static String getOutput(VirtualMachine vm)
             throws ClassNotFoundException, AgentLoadException,
             AgentInitializationException, IOException {
         debug("Loading Agent into target VM");
         vm.loadAgent(Util.findJarContaining(CLASS_WITHIN_BOOT_JAR).getName());
         Object error = vm.getSystemProperties().get(
-                MavenVersionAgent.PREFIX + "error");
+                MetaDataAgent.PREFIX + "msg");
         if (error != null) {
             debug("Detected Agent-side errors");
             error(error.toString());
         }
 
-        debug("Fetching Version");
-        return vm.getSystemProperties()
-                .get(MavenVersionAgent.PREFIX + "version").toString();
+        debug("Fetching Data");
+        Object maven_version = vm.getSystemProperties()
+                .get(MetaDataAgent.POM_PREFIX+ "version");
+        
+        Object release_string = vm.getSystemProperties()
+                .get(MetaDataAgent.MF_PREFIX+ "Platform-Release-String");
+        
+        if (release_string!=null ){
+        	String ret = release_string.toString();
+        	if (ret.trim().length()>0)
+        		return ret;
+        }
+        	
+        
+		return maven_version.toString();
     }
 
     private static void includeToolsJar(String toolsJar) throws Exception {

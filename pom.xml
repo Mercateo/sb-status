@@ -38,7 +38,7 @@
 				<configuration>
 					<archive>
 						<manifestEntries>
-							<Agent-Class>com.mercateo.ops.tools.springbootstatus.MavenVersionAgent</Agent-Class>
+							<Agent-Class>com.mercateo.ops.tools.springbootstatus.MetaDataAgent</Agent-Class>
 							<Main-Class>com.mercateo.ops.tools.springbootstatus.SpringBootProcessStatus</Main-Class>
 						</manifestEntries>
 					</archive>
