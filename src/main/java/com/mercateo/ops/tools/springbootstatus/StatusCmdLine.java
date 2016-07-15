@@ -15,11 +15,17 @@ public class StatusCmdLine {
     boolean verbose = false;
 
     @com.zwitserloot.cmdreader.Shorthand("t")
-    @Description("Path to tools.jar")
+    @Description("Optional path to tools.jar - if unset, sb-status tries to find it")
     String toolsJar = null;
 
+    @com.zwitserloot.cmdreader.Shorthand("a")
+    @Description("Name of the alternative Manifest-Attribute to use as Version, if it is set and non null - Defaults to 'Implementation-Version'")
+    String alternativeVersionAttribute;
+    
     @com.zwitserloot.cmdreader.Shorthand("h")
     @Description("This help")
     boolean help = false;
+    
+    
 
 }

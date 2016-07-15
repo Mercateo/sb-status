@@ -3,9 +3,6 @@ package com.mercateo.ops.tools.springbootstatus;
 import java.io.IOException;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.util.Optional;
-import java.util.Properties;
-import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.jar.Manifest;
 
@@ -37,32 +34,5 @@ class Util {
     public static JarFile findJarContaining(String cn)
             throws ClassNotFoundException, IOException {
         return findJarContaining(Class.forName(cn));
-    }
-
-    public static Properties findPomProperties(Class<?> c)
-            throws ClassNotFoundException, IOException {
-        return getPomProperties(findJarContaining(c));
-    }
-
-    public static Properties findPomProperties(String c)
-            throws ClassNotFoundException, IOException {
-        return getPomProperties(findJarContaining(c));
-    }
-
-    private static Properties getPomProperties(JarFile findJarContaining)
-            throws IOException {
-        Properties p = new Properties();
-        Optional<JarEntry> e = findJarContaining
-                .stream()
-                .filter(n -> n.getName().startsWith("META-INF/maven/")
-                        && n.getName().endsWith("/pom.properties"))
-
-                .findFirst();
-        if (e.isPresent()) {
-
-            p.load(findJarContaining.getInputStream(e.get()));
-
-        }
-        return p;
     }
 }
