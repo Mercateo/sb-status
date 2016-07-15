@@ -15,7 +15,7 @@ public class StatusCmdLine {
     boolean verbose = false;
 
     @com.zwitserloot.cmdreader.Shorthand("t")
-    @Description("Optional path to tools.jar - if unset, sb-status tries to find it")
+    @Description("Optional path to tools.jar – if unset, sb-status tries to find it")
     String toolsJar = null;
 
     @com.zwitserloot.cmdreader.Shorthand("a")

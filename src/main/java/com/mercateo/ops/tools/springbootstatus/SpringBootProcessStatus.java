@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.util.Properties;
 
 import javax.management.InstanceNotFoundException;
 import javax.management.MBeanServerConnection;
@@ -93,17 +94,23 @@ public class SpringBootProcessStatus {
 			throws ClassNotFoundException, AgentLoadException, AgentInitializationException, IOException {
 		debug("Loading Agent into target VM");
 		vm.loadAgent(Util.findJarContaining(CLASS_WITHIN_BOOT_JAR).getName());
-		Object error = vm.getSystemProperties().get(MetaDataAgent.ERR_PREFIX + "msg");
+		Properties props = vm.getSystemProperties();
+		Object error = props.get(MetaDataAgent.ERR_PREFIX + "msg");
+
 		if (error != null) {
 			debug("Detected Agent-side errors");
 			error(error.toString());
 		}
 
 		debug("Fetching Data");
+		if (cmd.verbose) {
+			props.entrySet().stream().filter(e -> e.getKey().toString().startsWith(MetaDataAgent.MF_PREFIX))
+					.forEach(e -> debug(e.getKey() + ":" + e.getValue()));
+		}
 
 		String alt = cmd.alternativeVersionAttribute;
 		if (alt != null) {
-			Object altVersion = vm.getSystemProperties().get(MetaDataAgent.MF_PREFIX + alt);
+			Object altVersion = props.get(MetaDataAgent.MF_PREFIX + alt);
 
 			if (altVersion != null) {
 				String ret = altVersion.toString();
@@ -114,8 +121,7 @@ public class SpringBootProcessStatus {
 
 		// fall through, if altVersion is not set or not found
 
-		Object maven_version = vm.getSystemProperties().get(MetaDataAgent.MF_PREFIX + "Implementation-Version");
-
+		Object maven_version = props.get(MetaDataAgent.MF_PREFIX + "Implementation-Version");
 		return maven_version.toString();
 	}
 
