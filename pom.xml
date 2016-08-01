@@ -66,6 +66,7 @@
 				<version>1.4.1</version>
 				<configuration>
 					<programFile>sb-status</programFile>
+					<scriptFile>src/main/packaging/launch.sh</scriptFile>
 				</configuration>
 				<executions>
 					<execution>
