@@ -9,6 +9,7 @@ public class MetaDataAgent {
 	static final String ERR_PREFIX = MetaDataAgent.class.getSimpleName() + ".error.";
 
 	public static void agentmain(String agentArgs, Instrumentation instrumentation) {
+		
 		String jarLauncher = "org.springframework.boot.loader.JarLauncher";
 		try {
 			copyManifestParameters(jarLauncher);

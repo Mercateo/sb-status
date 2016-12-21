@@ -14,6 +14,14 @@ public class StatusCmdLine {
     @Description("Create verbose output for debugging")
     boolean verbose = false;
 
+    @com.zwitserloot.cmdreader.Shorthand("b")
+    @Description("Use blocking mode")
+    boolean block = false;
+    
+    @com.zwitserloot.cmdreader.Shorthand("o")
+    @Description("Timeout when using blocking mode")
+    int timeout = 300;
+    
     @com.zwitserloot.cmdreader.Shorthand("t")
     @Description("Optional path to tools.jar – if unset, sb-status tries to find it")
     String toolsJar = null;

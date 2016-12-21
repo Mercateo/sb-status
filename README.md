@@ -10,28 +10,31 @@ We use this during deployment so that we can make sure a boot app is running and
 
 ### Usage
 
-sb-status [-vtah] pid 
+sb-status [-vbotah] pid 
 
   Sequential arguments:
-
     pid   
         Process ID of the Boot application you want to grab the
         Status/Version from
-
 
   Optional arguments:
 
     --verbose                         -v 
         Create verbose output for debugging
 
-    --toolsJar=val                    -t 
-        Optional path to tools.jar - if unset, sb-status tries to find
-        it
+    --block                           -b 
+        Use blocking mode
 
+    --timeout=val                     -o 
+        Timeout when using blocking mode  value is an integer.
+
+    --toolsJar=val                    -t 
+        Optional path to tools.jar – if unset, sb-status tries to find it
+    
     --alternativeVersionAttribute=val -a 
         Name of the alternative Manifest-Attribute to use as Version, if
         it is set and non null - Defaults to 'Implementation-Version'
-
+        
     --help                            -h This help
 
 ### TODO 
