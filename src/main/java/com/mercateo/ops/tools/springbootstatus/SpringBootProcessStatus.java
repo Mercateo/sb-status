@@ -6,6 +6,7 @@ import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.util.Optional;
 import java.util.Properties;
 
 import javax.management.AttributeNotFoundException;
@@ -192,8 +193,9 @@ public class SpringBootProcessStatus {
 
 		// fall through, if altVersion is not set or not found
 
-		Object maven_version = props.get(MetaDataAgent.MF_PREFIX + "Implementation-Version");
-		return maven_version.toString();
+		return Optional.ofNullable(props.get(MetaDataAgent.MF_PREFIX + "Implementation-Version"))
+				.map(Object::toString)
+				.orElse("n/a");
 	}
 
 	private static void includeToolsJar(String toolsJar) throws Exception {
