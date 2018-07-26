@@ -26,7 +26,9 @@ import com.sun.tools.attach.VirtualMachine;
 import com.zwitserloot.cmdreader.CmdReader;
 
 public class SpringBootProcessStatus {
-	private static final String JMX_URL = "org.springframework.boot:type=Endpoint,name=healthEndpoint";
+    private static final String JMX_URL_SB1 = "org.springframework.boot:type=Endpoint,name=healthEndpoint";
+
+    private static final String JMX_URL_SB2 = "org.springframework.boot:type=Endpoint,name=Health";
 
 	private static final long WAIT_INTERVAL = 100;
 
@@ -63,9 +65,7 @@ public class SpringBootProcessStatus {
 				while (System.currentTimeMillis() < timeLimit) {
 
 					try {
-						ObjectName objName = createObjectName();
-						String healthData = retrieveHealth(mbsc, objName);
-						StatusBean status = parse(healthData);
+                        StatusBean status = loadStatus(mbsc);
 
 						if (status.isUp()) {
 							debug("Status UP reached: '" + status.toString() + "'");
@@ -94,10 +94,7 @@ public class SpringBootProcessStatus {
 			try {
 
 				MBeanServerConnection mbsc = getConnection(connectorAddr);
-				ObjectName objName = createObjectName();
-
-				String healthData = retrieveHealth(mbsc, objName);
-				StatusBean status = parse(healthData);
+                StatusBean status = loadStatus(mbsc);
 
 				exit(status.isUp() ? 0 : 1);
 
@@ -111,23 +108,55 @@ public class SpringBootProcessStatus {
 		}
 	}
 
-	private static StatusBean parse(String healthData) {
+    private static StatusBean loadStatus(MBeanServerConnection mbsc)
+            throws MalformedObjectNameException, IOException, MBeanException,
+            AttributeNotFoundException, InstanceNotFoundException, ReflectionException {
+        String healthData;
+        ObjectName sb1ObjectName = createSB1ObjectName();
+        ObjectName sb2ObjectName = createSB2ObjectName();
+        if (mbsc.isRegistered(sb1ObjectName)) {
+            debug("Application seems to be SpringBoot 1.x, Query JMX for '"
+                    + sb1ObjectName + "'");
+            healthData = retrieveSB1Health(mbsc, sb1ObjectName);
+            return parse(healthData);
+        } else if (mbsc.isRegistered(sb2ObjectName)) {
+            debug("Application seems to be SpringBoot 2.x, Query JMX for '" + sb2ObjectName + "'");
+            healthData = retrieveSB2Health(mbsc, sb2ObjectName);
+            return parse(healthData);
+        } else {
+            throw new InstanceNotFoundException();
+        }
+    }
+
+    private static StatusBean parse(String healthData) {
 		StatusBean sb = new StatusBean(healthData);
 		debug("StatusBean parsed from healthData: '" + sb.toString() + "'");
 		return sb;
 	}
 
-	private static String retrieveHealth(MBeanServerConnection mbsc, ObjectName objName) throws MBeanException,
+    private static String retrieveSB1Health(MBeanServerConnection mbsc, ObjectName objName)
+            throws MBeanException,
 			AttributeNotFoundException, InstanceNotFoundException, ReflectionException, IOException {
 		String healthData = mbsc.getAttribute(objName, "Data").toString();
 		debug("Health endpoint returned: '" + healthData + "'");
 		return healthData;
 	}
 
-	private static ObjectName createObjectName() throws MalformedObjectNameException {
-		debug("Query JMX for '" + JMX_URL + "'");
-		return new ObjectName(JMX_URL);
+    private static String retrieveSB2Health(MBeanServerConnection mbsc, ObjectName objName)
+            throws MBeanException, InstanceNotFoundException,
+            ReflectionException, IOException {
+        String healthData = mbsc.invoke(objName, "health", null, null).toString();
+        debug("Health endpoint returned: '" + healthData + "'");
+        return healthData;
+    }
+
+    private static ObjectName createSB1ObjectName() throws MalformedObjectNameException {
+        return new ObjectName(JMX_URL_SB1);
 	}
+
+    private static ObjectName createSB2ObjectName() throws MalformedObjectNameException {
+        return new ObjectName(JMX_URL_SB2);
+    }
 
 	private static MBeanServerConnection getConnection(String connectorAddr) throws MalformedURLException, IOException {
 		JMXServiceURL serviceURL = new JMXServiceURL(connectorAddr);
